@@ -5,7 +5,7 @@ import {
 } from "@reduxjs/toolkit";
 import { request } from "@/utils";
 import type { ApiResponse } from "@/utils/request";
-
+import { setToken as _setToken, getToken } from "@/utils/token";
 /** 登录表单参数类型 */
 interface LoginForm {
   mobile: string;
@@ -20,12 +20,13 @@ const userStore = createSlice({
   name: "user",
   // 数据状态
   initialState: {
-    token: localStorage.getItem("token") || "",
+    token: getToken(),
   },
   //同步修改方法
   reducers: {
     setToken(state, actions: PayloadAction<string>) {
       state.token = actions.payload;
+      _setToken(actions.payload);
     },
   },
 });
@@ -44,6 +45,8 @@ const fetchLogin = (loginForm: LoginForm) => {
       "/authorizations",
       loginForm,
     );
+    console.log(res);
+
     //提交同步action进行token传入
     dispatch(setToken(res.data.data.token));
   };
