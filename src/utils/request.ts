@@ -21,6 +21,7 @@ const request: AxiosInstance = axios.create({
 // 添加请求拦截器
 request.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
+    //操作这个config注入token数据
     const token = localStorage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
