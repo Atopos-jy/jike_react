@@ -1,10 +1,29 @@
+import React from "react";
 import "./index.scss";
-import { Card, Form, Input, Button } from "antd";
+import { Card, Form, Input, Button, message } from "antd";
 import logo from "@/assets/logo.png";
+import { useAppDispatch } from "@/hooks/useAppDispatch";
+import { fetchLogin } from "@/store/modules/user";
+import { useNavigate } from "react-router-dom";
+
+//手机号13800000002
+//验证码246810
+type LoginFormValues = {
+  mobile: string;
+  code: string;
+};
 
 const Login = () => {
-  const onFinish = (values) => {
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const onFinish = async (values: LoginFormValues) => {
     console.log(values);
+    await dispatch(fetchLogin(values));
+
+    //跳转到首页
+    navigate("/");
+    //提示下一位用户
+    message.success("登录成功");
   };
   return (
     <div className="login">
@@ -13,7 +32,7 @@ const Login = () => {
         {/* 登录表单 */}
         <Form validateTrigger="onBlur" onFinish={onFinish}>
           <Form.Item
-            name="username"
+            name="mobile"
             //多条校验逻辑 顺序校验
             rules={[
               {
@@ -29,7 +48,7 @@ const Login = () => {
             <Input size="large" placeholder="请输入手机号" />
           </Form.Item>
           <Form.Item
-            name="password"
+            name="code"
             rules={[
               {
                 required: true,

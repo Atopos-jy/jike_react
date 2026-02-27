@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "ESNext", // 编译目标 ES 版本
+    "lib": ["DOM", "DOM.Iterable", "ESNext"], // 支持的库（浏览器环境）
+    "allowJs": true, // 允许保留 JS 文件（关键：无需一次性迁移）
+    "skipLibCheck": true, // 跳过第三方库类型检查
+    "esModuleInterop": true, // 兼容 CommonJS/ES 模块
+    "allowSyntheticDefaultImports": true,
+    "strict": true, // 开启严格类型检查（可选，新手可设为 false）
+    "forceConsistentCasingInFileNames": true,
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true, // CRA 接管编译，无需 TS 输出文件
+    "jsx": "react-jsx", // 适配 React 17+ JSX 转换
+    "baseUrl": "./", // 基础路径（适配 @ 别名）
+    "paths": {
+      "@/*": ["src/*"] // 和 Craco 别名保持一致
+    }
+  },
+  "include": ["src/**/*"], // 要编译的文件范围
+  "exclude": ["node_modules"] // 排除目录
+}
