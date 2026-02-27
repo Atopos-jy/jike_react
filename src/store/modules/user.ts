@@ -22,7 +22,7 @@ const userStore = createSlice({
   initialState: {
     token: getToken(),
   },
-  //同步修改方法
+  // 同步修改方法
   reducers: {
     setToken(state, actions: PayloadAction<string>) {
       state.token = actions.payload;
@@ -45,11 +45,18 @@ const fetchLogin = (loginForm: LoginForm) => {
       "/authorizations",
       loginForm,
     );
-    console.log(res);
-
     //提交同步action进行token传入
     dispatch(setToken(res.data.data.token));
   };
 };
-export { setToken, fetchLogin };
+
+// 获取个人用户信息
+const fetchUserInfo = () => {
+  return async (dispatch: Dispatch) => {
+    const res = await request.get<ApiResponse<any>>("/user/profile");
+    return res.data;
+  };
+};
+
+export { setToken, fetchLogin, fetchUserInfo };
 export default userReducer;
