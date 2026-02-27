@@ -1,15 +1,26 @@
-import { Layout, Menu, Popconfirm } from "antd";
-import {
-  HomeOutlined,
-  DiffOutlined,
-  EditOutlined,
-  LogoutOutlined,
-} from "@ant-design/icons";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Layout, Menu, Popconfirm, type MenuProps } from "antd";
+import { LogoutOutlined } from "@ant-design/icons";
 import "./index.scss";
+import { menuItems } from "@/router/layoutRoutes";
 
 const { Header, Sider } = Layout;
 
+const items: MenuProps["items"] = menuItems.map((item) => ({
+  key: item.key,
+  icon: item.icon,
+  label: item.label,
+}));
+
 const GeekLayout = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const selectedKey = location.pathname;
+
+  const onMenuClick: MenuProps["onClick"] = (e) => {
+    navigate(e.key);
+  };
+
   return (
     <Layout>
       <Header className="header">
@@ -28,22 +39,14 @@ const GeekLayout = () => {
           <Menu
             mode="inline"
             theme="dark"
-            defaultSelectedKeys={["1"]}
+            selectedKeys={[selectedKey]}
             style={{ height: "100%", borderRight: 0 }}
-          >
-            <Menu.Item icon={<HomeOutlined />} key="1">
-              数据概览
-            </Menu.Item>
-            <Menu.Item icon={<DiffOutlined />} key="2">
-              内容管理
-            </Menu.Item>
-            <Menu.Item icon={<EditOutlined />} key="3">
-              发布文章
-            </Menu.Item>
-          </Menu>
+            items={items}
+            onClick={onMenuClick}
+          />
         </Sider>
         <Layout className="layout-content" style={{ padding: 20 }}>
-          内容
+          <Outlet />
         </Layout>
       </Layout>
     </Layout>

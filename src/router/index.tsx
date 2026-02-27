@@ -3,6 +3,8 @@ import Login from "@/pages/Login";
 
 import { createBrowserRouter } from "react-router-dom";
 import AuthRoute from "@/components/AuthRoute";
+import layoutRoutes from "./layoutRoutes";
+
 //配置路由
 
 const router = createBrowserRouter([
@@ -13,6 +15,7 @@ const router = createBrowserRouter([
         <Layout />
       </AuthRoute>
     ),
+    children: layoutRoutes,
   },
   {
     path: "/login",
