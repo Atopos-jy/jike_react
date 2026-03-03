@@ -3,7 +3,7 @@ import {
   type PayloadAction,
   type Dispatch,
 } from "@reduxjs/toolkit";
-import { setToken as _setToken, getToken } from "@/utils/token";
+import { setToken as _setToken, getToken, removeToken } from "@/utils/token";
 import { getUserInfo, type UserResponse } from "@/api/user";
 import { getLogin, type LoginParams, type LoginData } from "@/api/login";
 
@@ -23,11 +23,16 @@ const userStore = createSlice({
     setUserInfo(state, actions: PayloadAction<UserResponse>) {
       state.userInfo = actions.payload;
     },
+    clearUserInfo(state) {
+      state.token = "";
+      state.userInfo = {} as UserResponse;
+      removeToken();
+    },
   },
 });
 
 //解构出actionCreater
-const { setToken, setUserInfo } = userStore.actions;
+const { setToken, setUserInfo, clearUserInfo } = userStore.actions;
 
 //获取reducer函数
 const userReducer = userStore.reducer;
@@ -51,5 +56,5 @@ const fetchUserInfo = () => {
   };
 };
 
-export { setToken, fetchLogin, fetchUserInfo };
+export { setToken, fetchLogin, fetchUserInfo, clearUserInfo };
 export default userReducer;

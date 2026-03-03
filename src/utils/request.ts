@@ -8,6 +8,8 @@ import axios, {
   type AxiosError,
   type InternalAxiosRequestConfig,
 } from "axios";
+import { getToken, removeToken } from "@/utils/token";
+import router from "@/router";
 
 import { ApiResponse } from "@/type/api";
 const request: AxiosInstance = axios.create({
@@ -18,7 +20,7 @@ const request: AxiosInstance = axios.create({
 request.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     //操作这个config注入token数据
-    const token = localStorage.getItem("token");
+    const token = getToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -28,7 +30,6 @@ request.interceptors.request.use(
     return Promise.reject(error);
   },
 );
-
 // 添加响应拦截器
 request.interceptors.response.use(
   (response: AxiosResponse<ApiResponse>) => {
@@ -39,6 +40,14 @@ request.interceptors.response.use(
   (error: AxiosError) => {
     // 超出 2xx 范围的状态码都会触发该函数。
     // 对响应错误做点什么
+    //监控401token失效
+    console.dir(error);
+    if (error.response?.status === 401) {
+      removeToken();
+      router.navigate("/login");
+      //强制刷新
+      window.location.reload();
+    }
     return Promise.reject(error);
   },
 );
