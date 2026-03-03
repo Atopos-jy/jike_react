@@ -9,11 +9,7 @@ import axios, {
   type InternalAxiosRequestConfig,
 } from "axios";
 
-export interface ApiResponse<T = any> {
-  data: T;
-  message: string;
-  code: number;
-}
+import { ApiResponse } from "@/type/api";
 const request: AxiosInstance = axios.create({
   baseURL: "http://geek.itheima.net/v1_0",
   timeout: 5000,
@@ -47,4 +43,32 @@ request.interceptors.response.use(
   },
 );
 
-export { request };
+const http = {
+  get<T>(url: string, params?: any): Promise<ApiResponse<T>> {
+    return request
+      .get<ApiResponse<T>>(url, { params })
+      .then((res) => res.data as ApiResponse<T>);
+  },
+  post<T>(url: string, data?: any): Promise<ApiResponse<T>> {
+    return request
+      .post<ApiResponse<T>>(url, data)
+      .then((res) => res.data as ApiResponse<T>);
+  },
+  put<T>(url: string, data?: any): Promise<ApiResponse<T>> {
+    return request
+      .put<ApiResponse<T>>(url, data)
+      .then((res) => res.data as ApiResponse<T>);
+  },
+  delete<T>(url: string, params?: any): Promise<ApiResponse<T>> {
+    return request
+      .delete<ApiResponse<T>>(url, { params })
+      .then((res) => res.data as ApiResponse<T>);
+  },
+  fetch<T>(url: string, params?: any): Promise<ApiResponse<T>> {
+    return request
+      .get<ApiResponse<T>>(url, { params })
+      .then((res) => res.data as ApiResponse<T>);
+  },
+};
+
+export default http;

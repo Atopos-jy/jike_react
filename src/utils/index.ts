@@ -1,3 +1,4 @@
-import { request } from "./request";
+import http from "./request";
 import { setToken, getToken, removeToken } from "./token";
-export { request, setToken, getToken, removeToken };
+export const request = http;
+export { setToken, getToken, removeToken };
