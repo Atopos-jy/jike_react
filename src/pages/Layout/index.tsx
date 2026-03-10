@@ -3,12 +3,9 @@ import { Layout, Menu, Popconfirm, type MenuProps } from "antd";
 import { LogoutOutlined } from "@ant-design/icons";
 import "./index.scss";
 import { menuItems } from "@/router/layoutRoutes";
-import { useSelector } from "react-redux";
-import { RootState } from "@/store";
-import { fetchUserInfo, clearUserInfo } from "@/store/modules/user";
-import { useEffect } from "react";
 import { useAppDispatch } from "@/hooks/useAppDispatch";
-
+import { useEffect } from "react";
+import { fetchUserInfo } from "@/store/modules/user";
 const { Header, Sider } = Layout;
 
 const items: MenuProps["items"] = menuItems.map((item) => ({
@@ -22,34 +19,22 @@ const GeekLayout = () => {
   const location = useLocation();
   const selectedKey = location.pathname;
 
+  const dispath = useAppDispatch();
+  useEffect(() => {
+    dispath(fetchUserInfo());
+  }, [dispath]);
   const onMenuClick: MenuProps["onClick"] = (e) => {
     navigate(e.key);
   };
 
-  const dispatch = useAppDispatch();
-  useEffect(() => {
-    dispatch(fetchUserInfo());
-  }, [dispatch]);
-
-  const userName = useSelector((state: RootState) => state.user.userInfo.name);
-
-  const onConfirmLogout = () => {
-    dispatch(clearUserInfo());
-    navigate("/login");
-  };
   return (
     <Layout>
       <Header className="header">
         <div className="logo" />
         <div className="user-info">
-          <span className="user-name">{userName || "用户"}</span>
+          <span className="user-name">user.name</span>
           <span className="user-logout">
-            <Popconfirm
-              title="是否确认退出？"
-              okText="退出"
-              cancelText="取消"
-              onConfirm={onConfirmLogout}
-            >
+            <Popconfirm title="是否确认退出？" okText="退出" cancelText="取消">
               <LogoutOutlined /> 退出
             </Popconfirm>
           </span>

@@ -1,4 +1,4 @@
-import type { ApiResponse } from "@/type/api";
+import { ApiResponse } from "@/type/api";
 import http from "@/utils/request";
 
 export interface UserResponse {
