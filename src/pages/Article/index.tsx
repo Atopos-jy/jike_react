@@ -51,8 +51,17 @@ const Article = () => {
     {
       title: "状态",
       dataIndex: "status",
-      // 明确 status 参数类型
-      render: (status: 0 | 1 | 2 | 3) => <Tag color="green">审核通过</Tag>,
+      render: (status: 0 | 1 | 2 | 3) => {
+        // 定义状态映射表：key 是 status 值，value 是对应的标签配置
+        const statusMap = {
+          0: { text: "草稿", color: "default" },
+          1: { text: "待审核", color: "warning" },
+          2: { text: "审核通过", color: "success" },
+          3: { text: "审核失败", color: "error" },
+        };
+        const { text, color } = statusMap[status];
+        return <Tag color={color}>{text}</Tag>;
+      },
     },
     {
       title: "发布时间",
