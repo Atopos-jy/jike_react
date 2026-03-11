@@ -20,8 +20,11 @@ import img404 from "@/assets/error.png";
 import type { ColumnsType } from "antd/es/table";
 import { useChannel } from "@/hooks/useChannel";
 import { useEffect, useState } from "react";
-import { getArticleList, type ArticleItem } from "@/api/article";
-import { number } from "echarts";
+import {
+  AritcleListParams,
+  getArticleList,
+  type ArticleItem,
+} from "@/api/article";
 // 定义封面类型
 interface ArticleCover {
   images: string[]; // 封面图片数组
@@ -32,7 +35,15 @@ dayjs.locale("zh-cn");
 const { Option } = Select;
 const { RangePicker } = DatePicker;
 
+interface ArticleFilterFormFields {
+  status: 0 | 1 | 2 | 3 | 4;
+  channel_id?: number;
+  date?: [dayjs.Dayjs, dayjs.Dayjs]; // 日期范围，可选（dayjs 类型）
+}
+
 const Article = () => {
+  const [form] = Form.useForm<ArticleFilterFormFields>();
+
   const columns: ColumnsType<ArticleItem> = [
     {
       title: "封面",
@@ -124,10 +135,29 @@ const Article = () => {
     page: 1,
     per_page: 10,
   });
-
+  //筛选功能
+  const [reqData, setReqData] = useState<AritcleListParams>({
+    page: 1,
+    per_page: 10,
+    status: "",
+    channel_id: 1,
+    begin_pubdate: "",
+    end_pubdate: "",
+  });
+  //获取当前的筛选数据
+  const onFinish = (formValue: ArticleFilterFormFields) => {
+    console.log(formValue);
+    setReqData({
+      ...reqData,
+      channel_id: formValue.channel_id,
+      status: formValue.status === 4 ? undefined : String(formValue.status),
+      begin_pubdate: formValue.date?.[0].format("YYYY-MM-DD"),
+      end_pubdate: formValue.date?.[1].format("YYYY-MM-DD"),
+    });
+  };
   useEffect(() => {
     const getList = async () => {
-      const res = await getArticleList(params);
+      const res = await getArticleList(reqData);
       console.log(res);
       const { results, total_count } = res.data;
       setArticleList({
@@ -136,7 +166,8 @@ const Article = () => {
       });
     };
     getList();
-  }, [params]);
+  }, [reqData]);
+
   return (
     <div className="article-page">
       <Card
@@ -156,6 +187,7 @@ const Article = () => {
           initialValues={{ status: 4 }}
           layout="inline"
           style={{ display: "flex", alignItems: "center", gap: 16 }}
+          onFinish={onFinish}
         >
           <Form.Item label="状态" name="status">
             <Radio.Group>

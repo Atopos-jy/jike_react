@@ -24,7 +24,7 @@ export interface PublishFormData {
 
 export interface AritcleListParams {
   status?: string;
-  channel_id?: string;
+  channel_id?: number;
   begin_pubdate?: string;
   end_pubdate?: string;
   page?: number;
