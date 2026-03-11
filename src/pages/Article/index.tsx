@@ -19,22 +19,12 @@ import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import img404 from "@/assets/error.png";
 import type { ColumnsType } from "antd/es/table";
 import { useChannel } from "@/hooks/useChannel";
-
+import { useEffect, useState } from "react";
+import { getArticleList, type ArticleItem } from "@/api/article";
+import { number } from "echarts";
 // 定义封面类型
 interface ArticleCover {
   images: string[]; // 封面图片数组
-}
-
-// 定义文章列表项类型
-interface ArticleItem {
-  id: string;
-  comment_count: number;
-  cover: ArticleCover;
-  like_count: number;
-  pubdate: string;
-  read_count: number;
-  status: 0 | 1 | 2 | 3 | 4;
-  title: string;
 }
 // 全局设置 dayjs 中文
 dayjs.locale("zh-cn");
@@ -113,7 +103,31 @@ const Article = () => {
     },
   ];
   const { channelOptions } = useChannel();
+  //文章列表
+  const [article, setArticleList] = useState<{
+    list: ArticleItem[];
+    count: number;
+  }>({
+    list: [],
+    count: 0,
+  });
+  const [params, setParams] = useState({
+    page: 1,
+    per_page: 10,
+  });
 
+  useEffect(() => {
+    const getList = async () => {
+      const res = await getArticleList(params);
+      console.log(res);
+      const { results, total_count } = res.data;
+      setArticleList({
+        list: results,
+        count: total_count,
+      });
+    };
+    getList();
+  }, [params]);
   return (
     <div className="article-page">
       <Card
@@ -177,8 +191,22 @@ const Article = () => {
         </Form>
       </Card>
       {/* 表格区域 */}
-      <Card title={`根据筛选条件共查询到 count 条结果：`}>
-        <Table rowKey="id" columns={columns} dataSource={data} />
+      <Card title={`根据筛选条件共查询到 ${article.count} 条结果：`}>
+        <Table
+          rowKey="id"
+          columns={columns}
+          dataSource={article.list}
+          pagination={{
+            current: params.page,
+            pageSize: params.per_page,
+            total: article.count,
+            onChange: (page, per_page) => {
+              setParams({ ...params, page, per_page });
+            },
+            showSizeChanger: true,
+            showQuickJumper: true,
+          }}
+        />
       </Card>
     </div>
   );
