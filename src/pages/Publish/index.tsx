@@ -15,17 +15,16 @@ import { Link } from "react-router-dom";
 import { Editor } from "@tinymce/tinymce-react";
 import {
   addArticle,
-  getChannel,
-  type ChannelItem,
   type PublishFormFields,
   type PublishFormData,
 } from "@/api/article";
 import "./index.scss";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { PlusOutlined } from "@ant-design/icons";
 import type { RadioChangeEvent } from "antd/es/radio";
 import type { UploadProps, UploadFile } from "antd/es/upload/interface";
 import { getToken } from "@/utils/token";
+import { useChannel } from "@/hooks/useChannel";
 // 封装 TinyMCE 组件，适配 Antd Form 的 value/onChange 接口
 const TEditor = ({
   value,
@@ -61,14 +60,7 @@ const Publish: React.FC = () => {
   // 给 Form 绑定强类型，指定表单字段类型
   const [form] = Form.useForm<PublishFormFields>();
 
-  const [channelOptions, setChannelOptions] = useState<ChannelItem[]>([]);
-  useEffect(() => {
-    const getChannelList = async () => {
-      const res = await getChannel();
-      setChannelOptions(res.data.channels);
-    };
-    getChannelList();
-  }, []);
+  const { channelOptions } = useChannel();
   const handleFormSubmit: FormProps<PublishFormFields>["onFinish"] = (
     values,
   ) => {

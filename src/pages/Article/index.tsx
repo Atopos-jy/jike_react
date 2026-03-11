@@ -17,7 +17,8 @@ import "./index.scss";
 import { Table, Tag, Space } from "antd";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import img404 from "@/assets/error.png";
-import { ColumnsType } from "antd/es/table";
+import type { ColumnsType } from "antd/es/table";
+import { useChannel } from "@/hooks/useChannel";
 
 // 定义封面类型
 interface ArticleCover {
@@ -32,7 +33,7 @@ interface ArticleItem {
   like_count: number;
   pubdate: string;
   read_count: number;
-  status: 0 | 1 | 2 | 3; // 状态只能是 0-3
+  status: 0 | 1 | 2 | 3 | 4;
   title: string;
 }
 // 全局设置 dayjs 中文
@@ -47,8 +48,9 @@ const Article = () => {
       title: "封面",
       dataIndex: "cover",
       width: 120,
-      render: (cover) => {
-        return <img src={cover || img404} width={80} height={60} alt="" />;
+      render: (cover: ArticleCover) => {
+        const coverUrl = cover?.images?.[0] || img404;
+        return <img src={coverUrl} width={80} height={60} alt="" />;
       },
     },
     {
@@ -59,7 +61,8 @@ const Article = () => {
     {
       title: "状态",
       dataIndex: "status",
-      render: (data) => <Tag color="green">审核通过</Tag>,
+      // 明确 status 参数类型
+      render: (status: 0 | 1 | 2 | 3) => <Tag color="green">审核通过</Tag>,
     },
     {
       title: "发布时间",
@@ -79,7 +82,7 @@ const Article = () => {
     },
     {
       title: "操作",
-      render: (data) => {
+      render: (_: any, record: ArticleItem) => {
         return (
           <Space size="middle">
             <Button type="primary" shape="circle" icon={<EditOutlined />} />
@@ -109,28 +112,31 @@ const Article = () => {
       title: "wkwebview离线化加载h5资源解决方案",
     },
   ];
+  const { channelOptions } = useChannel();
+
   return (
     <div className="article-page">
       <Card
         title={
-          <Breadcrumb separator=">">
-            <Breadcrumb.Item>
-              <Link to="/home">首页</Link>
-            </Breadcrumb.Item>
-            <Breadcrumb.Item>内容管理</Breadcrumb.Item>
-            <Breadcrumb.Item>文章列表</Breadcrumb.Item>
-          </Breadcrumb>
+          <Breadcrumb
+            separator=">"
+            items={[
+              { title: <Link to="/home">首页</Link> }, // 支持嵌套 Link 组件
+              { title: "内容管理" },
+              { title: "文章列表" },
+            ]}
+          />
         }
         style={{ marginBottom: 20 }}
       >
         <Form
-          initialValues={{ status: null }}
+          initialValues={{ status: 4 }}
           layout="inline"
           style={{ display: "flex", alignItems: "center", gap: 16 }}
         >
           <Form.Item label="状态" name="status">
             <Radio.Group>
-              <Radio value={null}>全部</Radio>
+              <Radio value={4}>全部</Radio>
               <Radio value={0}>草稿</Radio>
               <Radio value={1}>待审核</Radio>
               <Radio value={2}>审核通过</Radio>
@@ -144,8 +150,11 @@ const Article = () => {
               style={{ width: 160 }}
               allowClear
             >
-              <Option value="jack">Jack</Option>
-              <Option value="lucy">Lucy</Option>
+              {channelOptions.map((item) => (
+                <Option key={item.id} value={item.id}>
+                  {item.name}
+                </Option>
+              ))}
             </Select>
           </Form.Item>
 
