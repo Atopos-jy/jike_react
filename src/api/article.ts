@@ -12,14 +12,15 @@ export interface ChannelItem {
 
 export interface PublishFormFields {
   title: string;
+  type: number;
   content: string;
   cover: PublishFormData;
   channel_id: number;
 }
 
 export interface PublishFormData {
-  type: 0;
-  images: [];
+  type: number;
+  images: string[];
 }
 
 export const getChannel = (): Promise<ApiResponse<ChannelData>> => {
@@ -27,5 +28,5 @@ export const getChannel = (): Promise<ApiResponse<ChannelData>> => {
 };
 
 export const addArticle = (data: PublishFormFields): Promise<ApiResponse> => {
-  return http.post("/articles?draft=false", data);
+  return http.post("/mp/articles?draft=false", data);
 };

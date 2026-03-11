@@ -9,6 +9,7 @@ import {
   Button,
   Space,
   FormProps,
+  message,
 } from "antd";
 import { Link } from "react-router-dom";
 import { Editor } from "@tinymce/tinymce-react";
@@ -17,11 +18,14 @@ import {
   getChannel,
   type ChannelItem,
   type PublishFormFields,
+  type PublishFormData,
 } from "@/api/article";
 import "./index.scss";
 import { useEffect, useState } from "react";
 import { PlusOutlined } from "@ant-design/icons";
+import type { RadioChangeEvent } from "antd/es/radio";
 import type { UploadProps, UploadFile } from "antd/es/upload/interface";
+import { getToken } from "@/utils/token";
 // 封装 TinyMCE 组件，适配 Antd Form 的 value/onChange 接口
 const TEditor = ({
   value,
@@ -68,8 +72,19 @@ const Publish: React.FC = () => {
   const handleFormSubmit: FormProps<PublishFormFields>["onFinish"] = (
     values,
   ) => {
-    addArticle(values);
-    console.log(values);
+    if (imageList.length !== imageType) {
+      return message.warning("封面类型和封面数量不匹配");
+    }
+    const cover: PublishFormData = {
+      type: imageType,
+      images: imageList.map((item) => item.response?.data.url),
+    };
+    const submitData: PublishFormFields = {
+      ...values,
+      cover,
+    };
+    addArticle(submitData);
+    console.log(submitData);
   };
 
   const [imageList, setImageList] = useState<UploadFile[]>([]);
@@ -78,6 +93,12 @@ const Publish: React.FC = () => {
     console.log(value);
 
     setImageList(value.fileList);
+  };
+
+  const [imageType, setImageType] = useState(0);
+  const onTypeChange = (e: RadioChangeEvent) => {
+    console.log("模式切换了", e.target.value);
+    setImageType(e.target.value);
   };
   return (
     <div className="publish">
@@ -93,12 +114,13 @@ const Publish: React.FC = () => {
           labelCol={{ span: 4 }}
           wrapperCol={{ span: 16 }}
           initialValues={{
-            type: 1,
+            type: 0,
+            title: "",
             content: "",
             channel_id: 0,
             cover: {
-              type: 0,
-              images: [],
+              type: imageType,
+              images: imageList.map((item) => item.response?.data.url),
             },
           }}
           onFinish={handleFormSubmit} // 绑定提交回调
@@ -133,23 +155,30 @@ const Publish: React.FC = () => {
 
           <Form.Item label="封面">
             <Form.Item name="type">
-              <Radio.Group>
+              <Radio.Group onChange={onTypeChange}>
                 <Radio value={1}>单图</Radio>
-                <Radio value={2}>三图</Radio>
-                <Radio value={3}>无图</Radio>
+                <Radio value={3}>三图</Radio>
+                <Radio value={0}>无图</Radio>
               </Radio.Group>
             </Form.Item>
-            <Upload
-              listType="picture-card"
-              showUploadList
-              action={"http://geek.itheima.net/v1_0/upload"}
-              name="image"
-              onChange={onUploadChange}
-            >
-              <div style={{ marginTop: 8 }}>
-                <PlusOutlined />
-              </div>
-            </Upload>
+            {/* showUploadList: 控制显示上传列表 */}
+            {imageType > 0 && (
+              <Upload
+                listType="picture-card"
+                showUploadList
+                action={"http://geek.itheima.net/v1_0/upload"}
+                name="image"
+                onChange={onUploadChange}
+                maxCount={imageType}
+                headers={{
+                  Authorization: `Bearer ${getToken() || ""}`,
+                }}
+              >
+                <div style={{ marginTop: 8 }}>
+                  <PlusOutlined />
+                </div>
+              </Upload>
+            )}
           </Form.Item>
           <Form.Item
             label="内容"
