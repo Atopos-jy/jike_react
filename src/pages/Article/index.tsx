@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Card,
   Breadcrumb,
@@ -7,6 +7,7 @@ import {
   Radio,
   DatePicker,
   Select,
+  Popconfirm,
 } from "antd";
 // 改用 dayjs 中文语言包
 import dayjs from "dayjs";
@@ -22,6 +23,7 @@ import { useChannel } from "@/hooks/useChannel";
 import { useEffect, useState } from "react";
 import {
   AritcleListParams,
+  deleteArticle,
   getArticleList,
   type ArticleItem,
 } from "@/api/article";
@@ -43,6 +45,7 @@ interface ArticleFilterFormFields {
 
 const Article = () => {
   const [form] = Form.useForm<ArticleFilterFormFields>();
+  const navigate = useNavigate();
 
   const columns: ColumnsType<ArticleItem> = [
     {
@@ -95,13 +98,25 @@ const Article = () => {
       render: (_: any, record: ArticleItem) => {
         return (
           <Space size="middle">
-            <Button type="primary" shape="circle" icon={<EditOutlined />} />
             <Button
               type="primary"
-              danger
               shape="circle"
-              icon={<DeleteOutlined />}
+              icon={<EditOutlined />}
+              onClick={() => navigate(`/publish?id=${record.id}`)}
             />
+            <Popconfirm
+              title="确认删除该条文章吗?"
+              onConfirm={() => handleDelete(record)}
+              okText="确认"
+              cancelText="取消"
+            >
+              <Button
+                type="primary"
+                danger
+                shape="circle"
+                icon={<DeleteOutlined />}
+              />
+            </Popconfirm>
           </Space>
         );
       },
@@ -130,10 +145,6 @@ const Article = () => {
   }>({
     list: [],
     count: 0,
-  });
-  const [params, setParams] = useState({
-    page: 1,
-    per_page: 10,
   });
   //筛选功能
   const [reqData, setReqData] = useState<AritcleListParams>({
@@ -167,7 +178,37 @@ const Article = () => {
     };
     getList();
   }, [reqData]);
+  //分页功能
+  const handlePageChange = (page: number, pageSize: number) => {
+    setReqData({
+      ...reqData,
+      page,
+      per_page: pageSize,
+    });
+  };
+  //重置功能
+  const handleReset = () => {
+    form.resetFields(); // 重置表单
+    setReqData({
+      page: 1, // 重置分页到第一页
+      per_page: 10,
+      status: undefined,
+      channel_id: undefined,
+      begin_pubdate: undefined,
+      end_pubdate: undefined,
+    });
+  };
 
+  //编辑功能 跳转页面
+  //删除功能
+  const handleDelete = async (record: ArticleItem) => {
+    await deleteArticle(record.id);
+    setReqData({
+      page: 1,
+      per_page: 10,
+    });
+    console.log(data);
+  };
   return (
     <div className="article-page">
       <Card
@@ -225,7 +266,11 @@ const Article = () => {
             <Button type="primary" htmlType="submit">
               筛选
             </Button>
-            <Button htmlType="reset" style={{ marginLeft: 8 }}>
+            <Button
+              htmlType="reset"
+              style={{ marginLeft: 8 }}
+              onChange={handleReset}
+            >
               重置
             </Button>
           </Form.Item>
@@ -238,12 +283,10 @@ const Article = () => {
           columns={columns}
           dataSource={article.list}
           pagination={{
-            current: params.page,
-            pageSize: params.per_page,
+            current: reqData.page,
+            pageSize: reqData.per_page,
             total: article.count,
-            onChange: (page, per_page) => {
-              setParams({ ...params, page, per_page });
-            },
+            onChange: handlePageChange,
             showSizeChanger: true,
             showQuickJumper: true,
           }}

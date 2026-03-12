@@ -64,3 +64,9 @@ export const getArticleList = (
 ): Promise<ApiResponse<ArticleList>> => {
   return http.get("/mp/articles", params);
 };
+
+export const deleteArticle = (
+  id: string,
+): Promise<ApiResponse<ArticleList>> => {
+  return http.delete(`/mp/articles/${id}`);
+};
