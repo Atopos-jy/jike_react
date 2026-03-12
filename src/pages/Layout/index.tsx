@@ -1,11 +1,12 @@
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { Layout, Menu, Popconfirm, type MenuProps } from "antd";
+import { Layout, Menu, Popconfirm, type MenuProps, message } from "antd";
 import { LogoutOutlined } from "@ant-design/icons";
 import "./index.scss";
 import { menuItems } from "@/router/layoutRoutes";
 import { useAppDispatch } from "@/hooks/useAppDispatch";
 import { useEffect } from "react";
-import { fetchUserInfo } from "@/store/modules/user";
+import { fetchUserInfo, clearUserInfo } from "@/store/modules/user";
+import { removeToken } from "@/utils/index";
 const { Header, Sider } = Layout;
 
 const items: MenuProps["items"] = menuItems.map((item) => ({
@@ -19,12 +20,23 @@ const GeekLayout = () => {
   const location = useLocation();
   const selectedKey = location.pathname;
 
-  const dispath = useAppDispatch();
+  const dispatch = useAppDispatch();
   useEffect(() => {
-    dispath(fetchUserInfo());
-  }, [dispath]);
+    dispatch(fetchUserInfo());
+  }, [dispatch]);
   const onMenuClick: MenuProps["onClick"] = (e) => {
     navigate(e.key);
+  };
+
+  const handleLogout = () => {
+    try {
+      removeToken();
+      dispatch(clearUserInfo());
+      message.success("退出登录成功");
+      navigate("/login");
+    } catch {
+      message.error("退出登录失败，请重试");
+    }
   };
 
   return (
@@ -34,7 +46,12 @@ const GeekLayout = () => {
         <div className="user-info">
           <span className="user-name">user.name</span>
           <span className="user-logout">
-            <Popconfirm title="是否确认退出？" okText="退出" cancelText="取消">
+            <Popconfirm
+              title="是否确认退出？"
+              okText="退出"
+              cancelText="取消"
+              onConfirm={handleLogout}
+            >
               <LogoutOutlined /> 退出
             </Popconfirm>
           </span>
