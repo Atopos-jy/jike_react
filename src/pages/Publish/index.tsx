@@ -18,6 +18,7 @@ import {
   type PublishFormFields,
   type PublishFormData,
   getArticleById,
+  updateArticle,
 } from "@/api/article";
 import "./index.scss";
 import { useEffect, useState } from "react";
@@ -71,27 +72,39 @@ const Publish: React.FC = () => {
     }
     const cover: PublishFormData = {
       type: imageType,
-      images: imageList.map((item) => item.response?.data.url),
+      images: imageList.map((item) => {
+        if (item.response) {
+          return item.response.data.url;
+        } else {
+          return item.url;
+        }
+      }),
     };
     const submitData: PublishFormFields = {
       ...values,
       cover,
     };
-    addArticle(submitData);
-    console.log(submitData);
+    //处理调用不同接口 新增 - 新增接口 编辑状态 - 更新接口
+    if (articleId) {
+      updateArticle({ ...submitData, id: articleId });
+      message.success("更新文章成功");
+    } else {
+      addArticle(submitData);
+      message.success("发布文章成功");
+    }
+    form.resetFields();
+    setImageType(0);
+    setImageList([]);
   };
 
   const [imageList, setImageList] = useState<UploadFile[]>([]);
 
   const onUploadChange: UploadProps["onChange"] = (value) => {
-    console.log(value);
-
     setImageList(value.fileList);
   };
 
   const [imageType, setImageType] = useState(0);
   const onTypeChange = (e: RadioChangeEvent) => {
-    console.log("模式切换了", e.target.value);
     setImageType(e.target.value);
   };
 
@@ -124,7 +137,10 @@ const Publish: React.FC = () => {
       <Card
         title={
           <Breadcrumb
-            items={[{ title: <Link to="/">首页</Link> }, { title: "发布文章" }]}
+            items={[
+              { title: <Link to="/">首页</Link> },
+              { title: `${articleId ? "编辑" : "发布"}文章` },
+            ]}
           />
         }
       >

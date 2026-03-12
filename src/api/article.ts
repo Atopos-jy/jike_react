@@ -1,5 +1,6 @@
 import http from "@/utils/request";
 import type { ApiResponse } from "@/type/api";
+import { config } from "node:process";
 
 export interface ChannelData {
   channels: ChannelItem[];
@@ -10,6 +11,7 @@ export interface ChannelItem {
 }
 
 export interface PublishFormFields {
+  id?: string;
   title: string;
   type: number;
   content: string;
@@ -73,4 +75,8 @@ export const deleteArticle = (
 
 export const getArticleById = (id: string): Promise<ApiResponse> => {
   return http.get(`/mp/articles/${id}`);
+};
+
+export const updateArticle = (data: PublishFormFields) => {
+  return http.put(`/mp/articles/${data.id}?draft=false`, data);
 };
