@@ -11,15 +11,16 @@ import {
   FormProps,
   message,
 } from "antd";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Editor } from "@tinymce/tinymce-react";
 import {
   addArticle,
   type PublishFormFields,
   type PublishFormData,
+  getArticleById,
 } from "@/api/article";
 import "./index.scss";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PlusOutlined } from "@ant-design/icons";
 import type { RadioChangeEvent } from "antd/es/radio";
 import type { UploadProps, UploadFile } from "antd/es/upload/interface";
@@ -92,6 +93,22 @@ const Publish: React.FC = () => {
     console.log("模式切换了", e.target.value);
     setImageType(e.target.value);
   };
+
+  //回填数据
+  const [searchParams] = useSearchParams();
+  const articleId = searchParams.get("id");
+  useEffect(() => {
+    if (!articleId) {
+      console.log("无文章ID，进入新建文章模式");
+      return;
+    }
+    const getArticle = async () => {
+      const res = await getArticleById(articleId);
+      console.log(res);
+      form.setFieldsValue(res.data);
+    };
+    getArticle();
+  }, [articleId, form]);
   return (
     <div className="publish">
       <Card

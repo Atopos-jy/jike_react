@@ -70,3 +70,7 @@ export const deleteArticle = (
 ): Promise<ApiResponse<ArticleList>> => {
   return http.delete(`/mp/articles/${id}`);
 };
+
+export const getArticleById = (id: string): Promise<ApiResponse> => {
+  return http.get(`/mp/articles/${id}`);
+};
