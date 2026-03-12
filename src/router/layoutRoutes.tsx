@@ -1,8 +1,9 @@
-import Home from "@/pages/Home";
-import Article from "@/pages/Article";
-import Publish from "@/pages/Publish";
+import { lazy } from "react";
 import { HomeOutlined, DiffOutlined, EditOutlined } from "@ant-design/icons";
 
+const Home = lazy(() => import("@/pages/Home"));
+const Article = lazy(() => import("@/pages/Article"));
+const Publish = lazy(() => import("@/pages/Publish"));
 export const menuItems = [
   {
     path: "/home",

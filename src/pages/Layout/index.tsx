@@ -29,14 +29,9 @@ const GeekLayout = () => {
   };
 
   const handleLogout = () => {
-    try {
-      removeToken();
-      dispatch(clearUserInfo());
-      message.success("退出登录成功");
-      navigate("/login");
-    } catch {
-      message.error("退出登录失败，请重试");
-    }
+    dispatch(clearUserInfo());
+    message.success("退出登录成功");
+    navigate("/login");
   };
 
   return (

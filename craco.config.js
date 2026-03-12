@@ -1,5 +1,6 @@
 //扩展webpack的配置
 const path = require("path");
+const { whenProd, getPlugin, pluginByName } = require("@craco/craco");
 
 module.exports = {
   typescript: {
@@ -12,15 +13,43 @@ module.exports = {
       // 约定：使用 @ 表示 src 文件所在路径
       "@": path.resolve(__dirname, "src"),
     },
+    // 配置CDN
     configure: (webpackConfig) => {
-      // 配置 fallback，忽略 Node 核心模块
-      webpackConfig.resolve.fallback = {
-        ...webpackConfig.resolve.fallback,
-        http: false, // 忽略 http 模块
-        https: false, // 忽略 https 模块
-        stream: false, // 可选：若后续报 stream 错误也忽略
+      // webpackConfig自动注入的webpack配置对象
+      // 可以在这个函数中对它进行详细的自定义配置
+      // 只要最后return出去就行
+      let cdn = {
+        js: [],
+        css: [],
       };
-      webpackConfig.resolve.extensions = [".js", ".jsx", ".ts", ".tsx"];
+      // 只有生产环境才配置
+      if (process.env.NODE_ENV === 'production') {
+        // key:需要不参与打包的具体的包
+        // value: cdn文件中 挂载于全局的变量名称 为了替换之前在开发环境下
+        // 通过import 导入的 react / react-dom
+        webpackConfig.externals = {
+          react: "React",
+          "react-dom": "ReactDOM",
+        };
+        // 配置现成的cdn 资源数组 现在是公共为了测试
+        cdn.js = [
+          "https://unpkg.com/react@19.0.0/umd/react.production.min.js",
+          "https://unpkg.com/react-dom@19.0.0/umd/react-dom.production.min.js",
+        ];
+      }
+
+      // 都是为了将来配置 htmlWebpackPlugin插件 将来在public/index.html注入
+      // cdn资源数组时 准备好的一些现成的资源
+      const { isFound, match } = getPlugin(
+        webpackConfig,
+        pluginByName("HtmlWebpackPlugin"),
+      );
+
+      if (isFound) {
+        // 找到了HtmlWebpackPlugin的插件
+        match.options.cdn = cdn;
+      }
+
       return webpackConfig;
     },
   },
