@@ -26,6 +26,7 @@ import type { RadioChangeEvent } from "antd/es/radio";
 import type { UploadProps, UploadFile } from "antd/es/upload/interface";
 import { getToken } from "@/utils/token";
 import { useChannel } from "@/hooks/useChannel";
+import { url } from "node:inspector";
 // 封装 TinyMCE 组件，适配 Antd Form 的 value/onChange 接口
 const TEditor = ({
   value,
@@ -105,7 +106,16 @@ const Publish: React.FC = () => {
     const getArticle = async () => {
       const res = await getArticleById(articleId);
       console.log(res);
-      form.setFieldsValue(res.data);
+      form.setFieldsValue({
+        ...res.data,
+        type: res.data.cover.type,
+      });
+      setImageType(res.data.cover.type);
+      setImageList(
+        res.data.cover.images.map((url: Object) => {
+          return { url };
+        }),
+      );
     };
     getArticle();
   }, [articleId, form]);
@@ -179,6 +189,7 @@ const Publish: React.FC = () => {
                 name="image"
                 onChange={onUploadChange}
                 maxCount={imageType}
+                fileList={imageList}
                 headers={{
                   Authorization: `Bearer ${getToken() || ""}`,
                 }}
